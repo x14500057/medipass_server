@@ -1,36 +1,9 @@
 module.exports = {
     'connection':{
-     'host':'localhost',
-     'user':'root',
-     'password':'x14500057',
+     'host':'us-cdbr-iron-east-02.cleardb.net',
+     'user':'b795f1a2ae3d32',
+     'password':'a7fa35f1',
     },
-    'database':'medipassdb'
+    'database':'heroku_5964b350e9e6f96'
    };
-
-// const mysql = require('mysql');
-
-
-// module.exports = {
-
-//     //Connect to mySQL
-// const con = mysql.createConnection({
-// 	host:'localhost',
-// 	user: 'root',
-// 	password: 'x14500057',
-// 	database:'medipassdb'
-// });
-    
-//     query(text, params) {
-//         return new Promise((resolve, reject) => {
-//             con.query(text, params, (error, results, fields) => {
-//                 if (error) {
-//                     reject(error);
-//                 }
-//                 resolve(results);
-//             });
-
-            
-//         });
-//     }
-// };
 

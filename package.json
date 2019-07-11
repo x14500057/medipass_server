@@ -4,7 +4,7 @@
   "description": "This project demo to login/register with MySQL using NodeJS through android app",
   "main": "server.js",
   "engines": {
-    "node": "10.3.0"
+    "node": "10.16.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

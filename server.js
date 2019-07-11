@@ -13,6 +13,11 @@ const router = express.Router();
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
+app.get('/', (req, res) => {
+    res.status(200).send('Welcome to MediPass API');
+    console.log('MediPass API');
+})
+
 app.use("/api", router);
 
 //User Profile Info Routes
@@ -55,7 +60,7 @@ router.route("/medicinehistory/:pId").get(ehrsController.getPatientMedicineHisto
 
 
 
-const server = app.listen(3000, () => {
+const server = app.listen(3001, () => {
     
     const host = server.address().address;
     const port = server.address().port;

@@ -1,0 +1,7 @@
+{
+    "name": "MediPass Server",
+    "desccription": "API to securely handle http requests with using express",
+    "repository": "https://github.com/x14500057/medipass_server",
+    "keywords": ["node", "express", "api", "server"],
+    "image": "heroku/nodejs"
+}
