@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const mysql = require("mysql");
-const dbconfig = require('../config/database');
+const dbconfig = require('../config/database').default;
 const connection = mysql.createConnection(dbconfig.connection);
 
 connection.query('USE ' + dbconfig.database);
