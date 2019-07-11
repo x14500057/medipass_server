@@ -60,7 +60,7 @@ router.route("/medicinehistory/:pId").get(ehrsController.getPatientMedicineHisto
 
 
 
-const server = app.listen(3001, () => {
+const server = app.listen(process.env.PORT || 5000, () => {
     
     const host = server.address().address;
     const port = server.address().port;
