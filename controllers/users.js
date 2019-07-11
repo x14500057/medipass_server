@@ -1,17 +1,31 @@
 const crypto = require('crypto');
 const mysql = require("mysql");
 
-var db_config = {
-    host: 'localhost',
-      user: 'root',
-      password: 'x14500057',
-      database: 'medipassdb'
-  };
+// const pool = mysql.createPool({
+//     host: 'us-cdbr-iron-east-02.cleardb.net',
+//     user: 'b795f1a2ae3d32',
+//     database: 'a7fa35f1',
+//     password: 'heroku_5964b350e9e6f96'
+//   });
+
+// var connection =  mysql.createConnection ({
+//     host: 'us-cdbr-iron-east-02.cleardb.net',
+//       user: 'b795f1a2ae3d32',
+//       password: 'a7fa35f1',
+//       database: 'heroku_5964b350e9e6f96'
+//   });
+
   
-  var connection;
+  
+var connection;
   
   function handleDisconnect() {
-    connection = mysql.createConnection(db_config); // Recreate the connection, since
+        connection =  mysql.createConnection ({
+        host: 'us-cdbr-iron-east-02.cleardb.net',
+          user: 'b795f1a2ae3d32',
+          password: 'a7fa35f1',
+          database: 'heroku_5964b350e9e6f96'
+      });                                           // Recreate the connection, since
                                                     // the old one cannot be reused.
   
     connection.connect(function(err) {              // The server is either down
@@ -32,10 +46,7 @@ var db_config = {
   }
   
   handleDisconnect();
-// const dbconfig = require('../config/database');
-// const connection = mysql.createConnection(dbconfig.connection);
 
-// connection.query('USE ' + dbconfig.database);
 
 //Password Util
 var genRandomString = function(length) {
@@ -68,56 +79,64 @@ function checkHashPassword(user_password, salt) {
 }
 
 // // Register User
-// exports.registerUser = async (req, res ) => {
+exports.registerUser = async (req, res ) => {
 
-//     const post_data = req.body;                 // Get post params
-//     const email = post_data.email;              // Get email from post_data
-//     const plaint_password = post_data.password; // Get password from post_data
-// 	const hash_data = saltHashPassword(plaint_password);   //Get saltHashed password
-//     const password = hash_data.passwordHash;    //get hash value
-//     var salt = hash_data.salt;                  //Get salt
+    const post_data = req.body;                 // Get post params
+    const email = post_data.email;              // Get email from post_data
+    const plaint_password = post_data.password; // Get password from post_data
+	const hash_data = saltHashPassword(plaint_password);   //Get saltHashed password
+    const password = hash_data.passwordHash;    //get hash value
+    var salt = hash_data.salt;                  //Get salt
 
-//     //Validate Email Address
-//     if (!validateEmail(email)) {
-//          res.status(400).send('Email not valid');  
-//          return;
-//     } 
+    //Validate Email Address
+    if (!validateEmail(email)) {
+         res.status(400).send('Email not valid');  
+         return;
+    } 
 
-//     //password conditions 
-//     // {1: lowercase, 1:uppercase, 1: numeric, 1: special char, 8 or more chars}
-//     if(!checkPasswordStrength(plaint_password)) {
-//         res.status(400).send('password not valid');
-//         return;  
-//     }
+    //password conditions 
+    // {1: lowercase, 1:uppercase, 1: numeric, 1: special char, 8 or more chars}
+    if(!checkPasswordStrength(plaint_password)) {
+        res.status(400).send('password not valid');
+        return;  
+    }
 
-//     //SQL Queries
-//     const checkEmailSQL = 'Select * From `PatientAuth` Where Email =?';
-//     const insertUserSQL = 'INSERT INTO `PatientAuth`(`PatientID`, `Email`, `Password`, `Status`, `EmailVerified`, `salt`) VALUES (?,?,?,?,?,?)';
+    //SQL Queries
+    const checkEmailSQL = 'Select * From `PatientAuth` Where Email =?';
+    const insertUserSQL = 'INSERT INTO `PatientAuth`(`PatientID`, `Email`, `Password`, `Status`, `EmailVerified`, `salt`) VALUES (?,?,?,?,?,?)';
     
-//     try {
+    try {
 
-//         connection.query(checkEmailSQL, [email], (err, result, fields) => {
-//             if (err) throw err;
-//                 if (result && result.length) {
-//                     console.log(result);
-//                     res.status(409).send('Email Already Registered');
-//                 }
-
-//                 else {
-
-//                     connection.query(insertUserSQL, [null,email, password,0,0,salt], function(err, result, fields) {
-//                         if (err) throw err;
-//                         console.log(result.affectedRows + " record(s) updated");
-//                         res.status(201).send('User Medical Profile Successfully Updated');
-//                     });
-//                 }
-//         });
-//     } catch (error) {
         
-//         console.log('ERROR', error);
-//         res.status(400).send(error);
-//     }
-// };
+
+        connection.query(checkEmailSQL, [email], (err, result, fields) => {
+            if (err) throw err;
+                if (result && result.length) {
+                    console.log(result);
+                    res.status(409).send('Email Already Registered');
+                }
+
+                else {
+
+                    connection.query(insertUserSQL, [null, email, password,0,0,salt], function(err, result, fields) {
+                        if (err) throw err;
+                        console.log(result.affectedRows + " record(s) updated");
+                        res.status(201).send('User Medical Profile Successfully Updated');
+                        
+                    });
+                }
+                
+        });
+
+        
+    } catch (error) {
+        
+        console.log('ERROR', error);
+        res.status(400).send(error);
+    }
+
+    
+};
 
 //Login User
 exports.loginUser = async (req, res) => {

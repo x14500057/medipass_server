@@ -1,3 +1,5 @@
+const mysql = require('mysql');
+
 //Controllers
 const userController = require('./controllers/users');
 // const ehrsController = require('./controllers/healthrecords');
@@ -13,18 +15,39 @@ const router = express.Router();
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    res.status(200).send('Welcome to MediPass API');
-    console.log('MediPass API');
-})
+
+// var connection =  mysql.createConnection ({
+//         host: 'us-cdbr-iron-east-02.cleardb.net',
+//           user: 'b795f1a2ae3d32',
+//           password: 'a7fa35f1',
+//           database: 'heroku_5964b350e9e6f96'
+//       });
+
+// connection.connect();
+
+// app.get('/', async (req, res) => {
+
+//     await connection.query('SELECT * FROM PatientAuth', (err, result, fields) => {
+//         if (err) {
+//             console.log('error: ', err);
+//             throw err;
+//         }
+//         res.status(200).send(result);
+//     });
+//     // res.send('hello world');
+// });
+//     }
+//     res.status(200).send('Welcome to MediPass API');
+//     console.log('MediPass API');
+// })
 
 app.use("/api", router);
 
-//User Profile Info Routes
+// //User Profile Info Routes
 
-// router.route('/test/:sex').get(userController.test);
+// // router.route('/test/:sex').get(userController.test);
 
-// router.route("/register/").post(userController.registerUser);
+router.route("/register/").post(userController.registerUser);
 
 router.route("/loginUser/:email/:password").get(userController.loginUser);
 
