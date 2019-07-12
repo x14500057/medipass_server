@@ -1,25 +1,8 @@
 const crypto = require('crypto');
-const mysql = require("mysql");
-
-// const pool = mysql.createPool({
-//     host: 'us-cdbr-iron-east-02.cleardb.net',
-//     user: 'b795f1a2ae3d32',
-//     database: 'a7fa35f1',
-//     password: 'heroku_5964b350e9e6f96'
-//   });
-
-// var connection =  mysql.createConnection ({
-//     host: 'us-cdbr-iron-east-02.cleardb.net',
-//       user: 'b795f1a2ae3d32',
-//       password: 'a7fa35f1',
-//       database: 'heroku_5964b350e9e6f96'
-//   });
-
+const mysql = require("mysql");  
+let connection;
   
-  
-var connection;
-  
-  function handleDisconnect() {
+function handleDisconnect() {
         connection =  mysql.createConnection ({
         host: 'us-cdbr-iron-east-02.cleardb.net',
           user: 'b795f1a2ae3d32',
@@ -43,10 +26,9 @@ var connection;
         throw err;                                  // server variable configures this)
       }
     });
-  }
+}
   
-  handleDisconnect();
-
+handleDisconnect();
 
 //Password Util
 var genRandomString = function(length) {
@@ -104,12 +86,14 @@ exports.registerUser = async (req, res ) => {
     //SQL Queries
     const checkEmailSQL = 'Select * From `PatientAuth` Where Email =?';
     const insertUserSQL = 'INSERT INTO `PatientAuth`(`PatientID`, `Email`, `Password`, `Status`, `EmailVerified`, `salt`) VALUES (?,?,?,?,?,?)';
+    const createMedProfileSQL = `Insert Into PatientMedProfile (PatientID) VALUES (?)`;
+    const createDetailsSQL = `Insert Into PatientDetail (PatientID, CreatedDate) VALUES (?,?)`
     
     try {
 
         
 
-        connection.query(checkEmailSQL, [email], (err, result, fields) => {
+        await connection.query(checkEmailSQL, [email], (err, result, fields) => {
             if (err) throw err;
                 if (result && result.length) {
                     console.log(result);
@@ -117,11 +101,24 @@ exports.registerUser = async (req, res ) => {
                 }
 
                 else {
-
-                    connection.query(insertUserSQL, [null, email, password,0,0,salt], function(err, result, fields) {
+                    
+                    connection.query(insertUserSQL, [null, email, password,0,0,salt], async (err, result, fields) => {
                         if (err) throw err;
-                        console.log(result.affectedRows + " record(s) updated");
-                        res.status(201).send('User Medical Profile Successfully Updated');
+                        await connection.query('SELECT LAST_INSERT_ID() as newID', async (err, result, fields) =>{
+                            if (err) throw err;
+
+                            console.log(result[0].newID);
+                            const newID = result[0].newID;
+                             await connection.query(createDetailsSQL, [newID, new Date()], (err, result, fields) => {
+                                if (err) throw err;
+                                console.log(newID);
+                                connection.query(createMedProfileSQL, [newID], (err, result, fields) => {
+                                    if (err) throw err;
+                                console.log(result);
+                                res.status(201).send('User Successfully Created');
+                            });
+                        });
+                    });
                         
                     });
                 }
@@ -192,235 +189,235 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-// //Update Profile Details
-// exports.updatePatientDetails = async function(req, res) {
+//Update Profile Details
+exports.updatePatientDetails = async function(req, res) {
 
-//     const rbody = req.body;
+    const rbody = req.body;
 
-//     const pid = req.params.pid;
-//     const sname = rbody.sname;
-//     const fname = rbody.fname;
-//     const dob = rbody.dob;
-//     const sex = rbody.sex.toLowerCase();
-//     const ph_home = rbody.ph_home.trim();
-//     const ph_mobile = rbody.ph_mobile.trim();
+    const pid = req.params.pid;
+    const sname = rbody.sname;
+    const fname = rbody.fname;
+    const dob = rbody.dob;
+    const sex = rbody.sex.toLowerCase();
+    const ph_home = rbody.ph_home.trim();
+    const ph_mobile = rbody.ph_mobile.trim();
 
-//     //Validate sname
-//     if (!checkIfLetters(sname)) {
-//         res.status(400).send('sname not valid');  
-//         return;
-//    } 
+    //Validate sname
+    if (!checkIfLetters(sname)) {
+        res.status(400).send('sname not valid');  
+        return;
+   } 
 
-//    //Validate fname
-//    if (!checkIfLetters(fname)) {
-//         res.status(400).send('fname not valid');  
-//         return;
-//     }
+   //Validate fname
+   if (!checkIfLetters(fname)) {
+        res.status(400).send('fname not valid');  
+        return;
+    }
 
-//     //Validate ID
-//     if (!checkIfInteger(pid)) {
-//         res.status(400).send('id invalid');
-//         return;
-//     } 
+    //Validate ID
+    if (!checkIfInteger(pid)) {
+        res.status(400).send('id invalid');
+        return;
+    } 
 
 
-//     const sql = `Update PatientDetail Set SName = ?, FName = ?, DOB = ?, Sex = ?, Phone_Home = ?, Phone_Mobile = ? Where PatientID = ?`;
+    const sql = `Update PatientDetail Set SName = ?, FName = ?, DOB = ?, Sex = ?, Phone_Home = ?, Phone_Mobile = ? Where PatientID = ?`;
 
-//     try {
+    try {
 
-//         connection.query(sql, [sname, fname, dob, sex, ph_home, ph_mobile, pid], function(err, result, fields) {
-//             if (err) throw err;
-//                 console.log(result.affectedRows + " record(s) updated");
-//                 res.status(201).send('User Details Successfully Updated');
-//         });
+        connection.query(sql, [sname, fname, dob, sex, ph_home, ph_mobile, pid], function(err, result, fields) {
+            if (err) throw err;
+                console.log(result.affectedRows + " record(s) updated");
+                res.status(201).send('User Details Successfully Updated');
+        });
 
-//     } catch (error) {
+    } catch (error) {
         
-//         console.log('ERROR', error);
-//         res.status(400).send(error);
-//     }
-// };
+        console.log('ERROR', error);
+        res.status(400).send(error);
+    }
+};
 
-// //Update Profile Basic Medical Profile
+//Update Profile Basic Medical Profile
 
-// // ERROR - SAYS ITS SUCCESSFUL IF ITS NOT -- FIX -------------------- >
-// exports.updatePatientMedProfile = async function(req, res) {
+// ERROR - SAYS ITS SUCCESSFUL IF ITS NOT -- FIX -------------------- >
+exports.updatePatientMedProfile = async function(req, res) {
 
-//     const rbody = req.body;
-//     const pid = req.params.pid;
-//     const smoker = rbody.smoker;
-//     const drinker = rbody.drinker;
-//     const height = rbody.height;
-//     const weight = rbody.weight;
-//     const bloodtype = rbody.bloodtype.toString();
-//     const dnr = rbody.dnr;
-//     const allergies = rbody.allergies;
+    const rbody = req.body;
+    const pid = req.params.pid;
+    const smoker = rbody.smoker;
+    const drinker = rbody.drinker;
+    const height = rbody.height;
+    const weight = rbody.weight;
+    const bloodtype = rbody.bloodtype.toString();
+    const dnr = rbody.dnr;
+    const allergies = rbody.allergies;
 
-//     const sql = `Update PatientMedProfile Set Smoker = ?, Drinker = ?, Height = ?, Weight = ?,BloodType = ?, DNR = ?, Allergies = ? Where PatientID = ?`;
+    const sql = `Update PatientMedProfile Set Smoker = ?, Drinker = ?, Height = ?, Weight = ?,BloodType = ?, DNR = ?, Allergies = ? Where PatientID = ?`;
 
-//     try {
+    try {
 
-//         await connection.query(sql, [smoker, drinker, height, weight, bloodtype, dnr, allergies, pid], (err, result, fields) => {
-//             if (err) throw err;
-//                 console.log(result.affectedRows + " record(s) updated");
-//                 res.status(201).send('User Medical Profile Successfully Updated');
-//         });
+        await connection.query(sql, [smoker, drinker, height, weight, bloodtype, dnr, allergies, pid], (err, result, fields) => {
+            if (err) throw err;
+                console.log(result.affectedRows + " record(s) updated");
+                res.status(201).send('User Medical Profile Successfully Updated');
+        });
 
-//     } catch (error) {
+    } catch (error) {
         
-//         console.log('ERROR', error);
-//         res.status(400).send(error);
-//     }
-// };
+        console.log('ERROR', error);
+        res.status(400).send(error);
+    }
+};
 
-// //Get User Profile Info
-// exports.getUserInfo = async (req, res) => {
+//Get User Profile Info
+exports.getUserInfo = async (req, res) => {
 
-//     const pid = req.params.pid; //Get PatientID from request params
-//     const sql = `SELECT * From PatientDetail as pd Inner Join PatientMedProfile as pmp On pd.PatientID = pmp.PatientID Where pd.PatientID = ?`;
+    const pid = req.params.pid; //Get PatientID from request params
+    const sql = `SELECT * From PatientDetail as pd Inner Join PatientMedProfile as pmp On pd.PatientID = pmp.PatientID Where pd.PatientID = ?`;
 
-//     await connection.query(sql, [pid], (err, result, fields) => {
-//         connection.on('Error', (err) => {
-//             console.log('[MySQL ERROR', err);
-//             res.status(400).send('Registration ERROR: ', err);
-//         });
+    await connection.query(sql, [pid], (err, result, fields) => {
+        connection.on('Error', (err) => {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Registration ERROR: ', err);
+        });
 
-//         //If User Found
-//         if (result && result.length) {
-//             console.log('User Found');
-//             res.status(200).send(result[0]);
-//         }
-//         else {
-//             console.log('Not Found');
-//             res.status(404).send('Error No Details Found');
-//         }
-//     });
-// };
+        //If User Found
+        if (result && result.length) {
+            console.log('User Found');
+            res.status(200).send(result[0]);
+        }
+        else {
+            console.log('Not Found');
+            res.status(404).send('Error No Details Found');
+        }
+    });
+};
 
-// //Search HealthPractioners
-// exports.findHealthPactioner = async (req, res) => {
+//Search HealthPractioners
+exports.findHealthPactioner = async (req, res) => {
 
-//     const sc = connection.escape(req.params.searchContent);
-//     console.log(sc);
+    const sc = connection.escape(req.params.searchContent);
+    console.log(sc);
 
-//     const sql = `SELECT MedPractionerID, FName, SName, Email, FieldOdSpecialization, AddressID
-//                 FROM medipassdb.MedicalPractioner
-//                 Where FName LIKE '` +req.params.searchContent+ `%'
-//                 OR SName Like '` +req.params.searchContent+ `%'
-//                 OR Email Like  '` +req.params.searchContent+ `%'`;
+    const sql = `SELECT MedPractionerID, FName, SName, Email, FieldOdSpecialization, AddressID
+                FROM medipassdb.MedicalPractioner
+                Where FName LIKE '` +req.params.searchContent+ `%'
+                OR SName Like '` +req.params.searchContent+ `%'
+                OR Email Like  '` +req.params.searchContent+ `%'`;
                 
-//                 console.log(sql);
+                console.log(sql);
 
-//     await connection.query(sql, function(err, result, fields) {
-//         connection.on('Error', function(err) {
-//             console.log('[MySQL ERROR', err);
-//             res.status(400).send('Search ERROR: ', err);
-//         });
+    await connection.query(sql, function(err, result, fields) {
+        connection.on('Error', function(err) {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Search ERROR: ', err);
+        });
 
-//         //If User Found
-//         if (result && result.length) {
-//             console.log('User Found');
-//             res.status(200).send(result);
-//         }
-//         else {
-//             console.log('Not Found');
-//             res.status(404).send('Error No Details Found');
-//         }
-//     });
-// };
+        //If User Found
+        if (result && result.length) {
+            console.log('User Found');
+            res.status(200).send(result);
+        }
+        else {
+            console.log('Not Found');
+            res.status(404).send('Error No Details Found');
+        }
+    });
+};
 
-// //Add Connection with Doctor
-// exports.addConnection = async (req, res) => {
+//Add Connection with Doctor
+exports.addConnection = async (req, res) => {
 
-//     const p_id = req.params.pid;   //Get The PatientID from request
-//     const mp_id = req.params.mpid; //Get The Medical Practioners ID from request
-//     const sql = 'INSERT INTO Connection (`PatientID`, `MedicalPractionerID`, `CreatedAt`, `ExpireAt`, `ConsentStatus`) VALUES (?,?,?,?,?)';
+    const p_id = req.params.pid;   //Get The PatientID from request
+    const mp_id = req.params.mpid; //Get The Medical Practioners ID from request
+    const sql = 'INSERT INTO Connection (`PatientID`, `MedicalPractionerID`, `CreatedAt`, `ExpireAt`, `ConsentStatus`) VALUES (?,?,?,?,?)';
 
-//     console.log('pid:'+p_id+'\nmp_id:'+mp_id);
+    console.log('pid:'+p_id+'\nmp_id:'+mp_id);
 
-//     connection.query(sql, [p_id, mp_id, new Date(), new Date(), 1], function(err, result, fields) {
-//         connection.on('ERROR', function(err) {
-//             console.log('[MySQL ERROR', err);
-//             res.status(400).send('Connection Insert ERROR: ', err);
-//         });
+    connection.query(sql, [p_id, mp_id, new Date(), new Date(), 1], function(err, result, fields) {
+        connection.on('ERROR', function(err) {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Connection Insert ERROR: ', err);
+        });
 
-//     console.log('Connection Added.');
-//     res.status(201).send('Connection Added.');
+    console.log('Connection Added.');
+    res.status(201).send('Connection Added.');
 
-//     });
-// };
+    });
+};
 
-// //View Connections
-// exports.viewConnections = async (req, res) => {
-//     const pid = req.params.pid;
-//     const sql = `select * from Connection as c
-//                 Join MedicalPractioner as mp
-//                 ON c.MedicalPractionerID = mp.MedPractionerID
-//                 where c.PatientId = ?`;
+//View Connections
+exports.viewConnections = async (req, res) => {
+    const pid = req.params.pid;
+    const sql = `select * from Connection as c
+                Join MedicalPractioner as mp
+                ON c.MedicalPractionerID = mp.MedPractionerID
+                where c.PatientId = ?`;
 
-//     await connection.query(sql, [pid], (err, result, fields) => {
+    await connection.query(sql, [pid], (err, result, fields) => {
 
-//         connection.on('Error', function(err) {
-//             console.log('[MySQL ERROR', err);
-//             res.status(400).send('Registration ERROR: ', err);
-//         });
+        connection.on('Error', function(err) {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Registration ERROR: ', err);
+        });
 
-//         //If Connections found
-//         if(result && result.length) {
-//             console.log(result);
-//             res.status(200).send(result);
-//         }
+        //If Connections found
+        if(result && result.length) {
+            console.log(result);
+            res.status(200).send(result);
+        }
 
-//         //If No Connections
-//         else {
-//             console.log('No Connections Found');
-//             res.status(404).send('No Connections Found');
-//         }
-//     });
-// };
+        //If No Connections
+        else {
+            console.log('No Connections Found');
+            res.status(404).send('No Connections Found');
+        }
+    });
+};
 
-// //Alter Consent on Connection
-// exports.alterConnectionConsent = async (req, res) => {
-//     const pid = req.params.pid;
-//     const mpid = req.params.mpid;
-//     const cs = req.params.consentStatus;
-//     const sql = `Update Connection Set ConsentStatus = ? Where PatientID = ? AND MedicalPractionerID = ?`;
+//Alter Consent on Connection
+exports.alterConnectionConsent = async (req, res) => {
+    const pid = req.params.pid;
+    const mpid = req.params.mpid;
+    const cs = req.params.consentStatus;
+    const sql = `Update Connection Set ConsentStatus = ? Where PatientID = ? AND MedicalPractionerID = ?`;
 
-//     try {
+    try {
 
-//     await connection.query(sql, [cs, pid, mpid], (err, result, fields) => {
+    await connection.query(sql, [cs, pid, mpid], (err, result, fields) => {
 
-//         if (err) throw err;
-//             console.log(result.affectedRows + " record(s) updated");
-//             res.status(200).send('Consent Changed');
-//         });
+        if (err) throw err;
+            console.log(result.affectedRows + " record(s) updated");
+            res.status(200).send('Consent Changed');
+        });
 
-//     } catch (error) {
+    } catch (error) {
         
-//         console.log('ERROR', error);
-//         res.status(400).send(error);
-//     }
-// };
+        console.log('ERROR', error);
+        res.status(400).send(error);
+    }
+};
 
-// exports.test = async (req, res) => {
-//     let sex = req.params.sex.toLowerCase();
-//     console.log(sex);
+exports.test = async (req, res) => {
+    let sex = req.params.sex.toLowerCase();
+    console.log(sex);
 
-//     if(validateSex(sex) == 'm') {
-//         sex = 1;
-//     }
-//     else if (validateSex(sex) == 'f'){
-//         sex = 0;
-//     }
-//     else{
-//         console.log('Sex parameter is invalid');
-//         return;
-//     }
+    if(validateSex(sex) == 'm') {
+        sex = 1;
+    }
+    else if (validateSex(sex) == 'f'){
+        sex = 0;
+    }
+    else{
+        console.log('Sex parameter is invalid');
+        return;
+    }
 
-//     console.log(sex);
+    console.log(sex);
 
     
-// }
+};
 
 
 ////////////////////////////

@@ -1,5 +1,3 @@
-const mysql = require('mysql');
-
 //Controllers
 const userController = require('./controllers/users');
 // const ehrsController = require('./controllers/healthrecords');
@@ -15,55 +13,34 @@ const router = express.Router();
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
+app.get('/', async (req, res) => {
 
-// var connection =  mysql.createConnection ({
-//         host: 'us-cdbr-iron-east-02.cleardb.net',
-//           user: 'b795f1a2ae3d32',
-//           password: 'a7fa35f1',
-//           database: 'heroku_5964b350e9e6f96'
-//       });
-
-// connection.connect();
-
-// app.get('/', async (req, res) => {
-
-//     await connection.query('SELECT * FROM PatientAuth', (err, result, fields) => {
-//         if (err) {
-//             console.log('error: ', err);
-//             throw err;
-//         }
-//         res.status(200).send(result);
-//     });
-//     // res.send('hello world');
-// });
-//     }
-//     res.status(200).send('Welcome to MediPass API');
-//     console.log('MediPass API');
-// })
+    res.status(200).send('Welcome to MediPass API');
+    console.log('MediPass API');
+    
+})
 
 app.use("/api", router);
 
 // //User Profile Info Routes
 
-// // router.route('/test/:sex').get(userController.test);
-
 router.route("/register/").post(userController.registerUser);
 
-router.route("/loginUser/:email/:password").get(userController.loginUser);
+router.route("/login/:email/:password").get(userController.loginUser);
 
-// router.route("/user/:pid/getUserInfo/").get(userController.getUserInfo);
+router.route("/user/:pid/getUserInfo").get(userController.getUserInfo);
 
-// router.route("/user/:pid/updatePatientDetails/").post(userController.updatePatientDetails);
+router.route("/user/:pid/updateDetails").post(userController.updatePatientDetails);
 
-// router.route("/user/:pid/updatePatientMedProfile/").post(userController.updatePatientMedProfile);
+router.route("/user/:pid/updateMedProfile").post(userController.updatePatientMedProfile);
 
-// router.route("/findDoctor/:searchContent").get(userController.findHealthPactioner);
+router.route("/findDoctor/:searchContent").get(userController.findHealthPactioner);
 
-// router.route("/user/:pid/addConnection/:mpid").get(userController.addConnection);
+router.route("/user/:pid/addConnection/:mpid").get(userController.addConnection);
 
-// router.route("/user/:pid/viewConnections").get(userController.viewConnections);
+router.route("/user/:pid/connections").get(userController.viewConnections);
 
-// router.route('/user/:pid/connection/:mpid/:consentStatus').get(userController.alterConnectionConsent);
+router.route('/user/:pid/alterConnection/:mpid/:consentStatus').get(userController.alterConnectionConsent);
 
 
 // //MediKey Routes
