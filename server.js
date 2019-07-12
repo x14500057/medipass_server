@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 app.get('/emergency/:number/', (req, res) => {
     const number = req.params.number;
-    const text = 'Emergency';
+    const text = 'Emergency \n Toni Byrne has been in an accident at \n 3 Knockabawn Quay Road';
 
     nexmo.message.sendSms(
         'Nexmo', number, text, {type: 'unicode'},
