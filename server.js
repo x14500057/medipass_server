@@ -7,18 +7,48 @@ const userController = require('./controllers/users');
 const express = require("express");
 const bodyParser = require('body-parser');
 
+const Nexmo = require('nexmo');
+
+
 const app = express();
 const router = express.Router();
+
+//Init Nexmo
+const nexmo = new Nexmo({
+    apiKey: 'db1d762c',
+    apiSecret: 'BhJoQXQO6zz1nahc'
+}, {debug: true});
 
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
-app.get('/', async (req, res) => {
+app.get('/emergency/:number/', (req, res) => {
+    const number = req.params.number;
+    const text = 'Emergency';
 
-    res.status(200).send('Welcome to MediPass API');
-    console.log('MediPass API');
-    
-})
+    nexmo.message.sendSms(
+        'Nexmo', number, text, {type: 'unicode'},
+        (err, responseData) => {
+            if(err) {
+                console.log(err);
+            }
+            else{
+                console.dir(responseData);
+            }
+        }
+    );
+
+    res.send('sent');
+});
+
+
+
+// app.get('/', async (req, res) => {
+
+//     res.status(200).send('Welcome to MediPass API');
+//     console.log('MediPass API');
+
+// })
 
 app.use("/api", router);
 
