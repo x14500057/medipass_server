@@ -27,7 +27,7 @@ app.get('/emergency/:number/', (req, res) => {
     const text = 'Emergency \n Toni Byrne has been in an accident at \n 3 Knockabawn Quay Road';
 
     nexmo.message.sendSms(
-        'Nexmo', number, text, {type: 'unicode'},
+        'MediPass - Emergency', number, text, {type: 'unicode'},
         (err, responseData) => {
             if(err) {
                 console.log(err);
