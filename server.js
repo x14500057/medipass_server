@@ -24,10 +24,10 @@ app.use(bodyParser.json());
 
 app.get('/emergency/:number/', (req, res) => {
     const number = req.params.number;
-    const text = 'Emergency \n Toni Byrne has been in an accident at \n 3 Knockabawn Quay Road';
+    const text = 'Emergency \n Toni Byrne has been in an accident at \n\n3 Knockabawn, \nQuay Road,\nRush,\nCo.Dublin';
 
     nexmo.message.sendSms(
-        'MediPass - Emergency', number, text, {type: 'unicode'},
+        'Emergency MEDIPASS', number, text, {type: 'unicode'},
         (err, responseData) => {
             if(err) {
                 console.log(err);
