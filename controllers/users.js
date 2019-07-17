@@ -164,7 +164,7 @@ exports.loginUser = async (req, res) => {
                 //Hash Password from login request with salt in Database.
                 const hashed_pass = checkHashPassword(user_password, salt).passwordHash;
                 if (pass == hashed_pass) {
-                    res.status(200).send(JSON.stringify(result[0]));
+                    res.status(200).send(result[0]);
                 }
                 else {
                     console.log(result);
