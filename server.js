@@ -56,7 +56,9 @@ app.use("/api", router);
 
 router.route("/register/").post(userController.registerUser);
 
-router.route("/login/:email/:password").get(userController.loginUser);
+// router.route("/login/:email/:password").get(userController.loginUser);
+
+router.route("/login").post(userController.loginUser);
 
 router.route("/user/:pid/getUserInfo").get(userController.getUserInfo);
 
