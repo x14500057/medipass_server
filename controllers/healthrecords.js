@@ -188,7 +188,7 @@ exports.getEMR = async function(req, res) {
                 o[key].push(nestedRows);
                 console.log(o);
                 // res.send(JSON.stringify(nestedRows));
-                res.send(nestedRows);
+                res.send(o);
             }
         
         });
