@@ -1,6 +1,6 @@
 //Controllers
 const userController = require('./controllers/users');
-// const ehrsController = require('./controllers/healthrecords');
+const ehrsController = require('./controllers/healthrecords');
 // const mediKeyController = require('./controllers/medi_key');
 
 //Modules
@@ -84,7 +84,7 @@ router.route('/user/:pid/alterConnection/:mpid/:consentStatus').get(userControll
 
 // router.route("/prescriptions/:pId").get(ehrsController.getPrescriptions);
 
-// router.route("/consultations/:pId").get(ehrsController.getConsultations);
+router.route("/user/:pId/consultations").get(ehrsController.getConsultations);
 
 // router.route("/emr/:cId").get(ehrsController.getEMR);
 

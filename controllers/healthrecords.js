@@ -1,8 +1,34 @@
+const crypto = require('crypto');
 const mysql = require("mysql");
-const dbconfig = require('../config/database');
-const connection = mysql.createConnection(dbconfig.connection);
-var func = require('../main.js');
-connection.query('USE ' + dbconfig.database);
+let connection;
+
+function handleDisconnect() {
+    connection = mysql.createConnection({
+        host: 'us-cdbr-iron-east-02.cleardb.net',
+        user: 'b795f1a2ae3d32',
+        password: 'a7fa35f1',
+        database: 'heroku_5964b350e9e6f96'
+    });                                           // Recreate the connection, since
+    // the old one cannot be reused.
+
+    connection.connect(function (err) {              // The server is either down
+        if (err) {                                     // or restarting (takes a while sometimes).
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+        }                                     // to avoid a hot loop, and to allow our node script to
+    });                                     // process asynchronous requests in the meantime.
+    // If you're also serving http, display a 503 error.
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            throw err;                                  // server variable configures this)
+        }
+    });
+}
+
+handleDisconnect();
 
 //Get All Valid Prescriptions
 exports.getValidPrescriptions = async (req, res) => {
@@ -82,15 +108,20 @@ exports.getConsultations = async function(req, res) {
 
     //Get Patient ID from HTTP Request
     const pId = req.params.pId;
-
-    //Construct SQL Query
-    const sql = `SELECT * FROM Consultation WHERE PatientID =` +pId;
+    
+    // //Construct SQL Query
+    const sql = `SELECT * FROM Consultation WHERE PatientID = ?`;
 
     try {
+        await connection.query(sql, [pId], (err, result, fields) => {
+            if(err) throw err;
 
-        const data = await connection.query(sql);
-        console.log(data);
-        res.status(200).send(data);
+            console.log(result);
+            res.status(200).send(result);
+        });
+        // const data = await connection.query(sql);
+        // console.log(data);
+        // res.status(200).send(data);
         
     } catch (error) {
         
