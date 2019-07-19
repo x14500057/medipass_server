@@ -108,6 +108,10 @@ exports.getConsultations = async function(req, res) {
 
     //Get Patient ID from HTTP Request
     const pId = req.params.pId;
+
+    let o = {} // empty Object
+let key = 'Consultations';
+o[key] = []; // empty Array, which you can push() values into
     
     // //Construct SQL Query
     const sql = `SELECT * FROM Consultation WHERE PatientID = ?`;
@@ -116,8 +120,14 @@ exports.getConsultations = async function(req, res) {
         await connection.query(sql, [pId], (err, result, fields) => {
             if(err) throw err;
 
-            console.log(result);
-            res.status(200).send(result);
+            for(i = 0; i < result.length; i++) {
+                console.log(result[i]);
+                o[key].push(result[i]);
+            }
+            
+            let response = o[key];
+            console.log(o);
+            res.status(200).send(o);
         });
         // const data = await connection.query(sql);
         // console.log(data);
