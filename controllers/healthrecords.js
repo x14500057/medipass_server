@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const mysql = require("mysql");
+const func = require("../main");
 let connection;
 
 function handleDisconnect() {
@@ -110,8 +111,8 @@ exports.getConsultations = async function(req, res) {
     const pId = req.params.pId;
 
     let o = {} // empty Object
-let key = 'Consultations';
-o[key] = []; // empty Array, which you can push() values into
+    let key = 'Consultations';
+    o[key] = []; // empty Array, which you can push() values into
     
     // //Construct SQL Query
     const sql = `SELECT * FROM Consultation as c Inner Join MedicalPractioner AS mp ON c.MedPractionerID = mp.MedPractionerID WHERE PatientID = ?`;
@@ -125,7 +126,7 @@ o[key] = []; // empty Array, which you can push() values into
                 o[key].push(result[i]);
             }
             
-            let response = o[key];
+        
             console.log(o);
             res.status(200).send(o);
         });
@@ -147,6 +148,10 @@ o[key] = []; // empty Array, which you can push() values into
 exports.getEMR = async function(req, res) {
 
     const cId= req.params.cId;
+    let o = {} // empty Object
+    let key = 'emr';
+    o[key] = []; // empty Array, which you can push() values into
+    
     const sqlQuery = `Select c.*, mp.MedPractionerID, mp.FName, mp.SName, p.*, pm.*, m.*
                         From Consultation AS c 
                         Left Join MedicalPractioner AS mp
@@ -180,7 +185,8 @@ exports.getEMR = async function(req, res) {
             else {
                 var nestedRows = func.convertToNested(rows, nestingOptions);
 
-                console.log(nestedRows);
+                o[key].push(nestedRows);
+                console.log(o);
                 // res.send(JSON.stringify(nestedRows));
                 res.send(nestedRows);
             }
