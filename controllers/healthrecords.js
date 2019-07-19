@@ -114,7 +114,7 @@ let key = 'Consultations';
 o[key] = []; // empty Array, which you can push() values into
     
     // //Construct SQL Query
-    const sql = `SELECT * FROM Consultation WHERE PatientID = ?`;
+    const sql = `SELECT * FROM Consultation as c Inner Join MedicalPractioner AS mp ON c.MedPractionerID = mp.MedPractionerID WHERE PatientID = ?`;
 
     try {
         await connection.query(sql, [pId], (err, result, fields) => {
