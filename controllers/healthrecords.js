@@ -184,8 +184,8 @@ exports.getEMR = async function(req, res) {
 
             else {
                 var nestedRows = func.convertToNested(rows, nestingOptions);
-
-                o[key].push(nestedRows);
+                
+                o[key] = nestedRows;
                 console.log(o);
                 // res.send(JSON.stringify(nestedRows));
                 res.send(o);
