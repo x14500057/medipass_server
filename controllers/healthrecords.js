@@ -174,14 +174,14 @@ exports.getEMR = async function(req, res) {
                 
             
                     var emr = JSON.parse('{"emr":' +
-                    '{"cid":"'+result[0].ConsultationID+'","pid":"'+result[0].PatientID+'","mpid":"'+result[0].MedPractionerID+'","symptoms":"'+result[0].Symptoms+'", ' +
+                    '{"cid":"'+result[0].ConsultationID+'","pid":'+result[0].PatientID+',"mpid":'+result[0].MedPractionerID+',"symptoms":"'+result[0].Symptoms+'", ' +
                     '"diagnostics":"'+result[0].Diagnostic+'","treatments":"'+result[0].Treatment+'","bpressure":"'+result[0].BPressure+'","notes":"'+result[0].Notes+'", ' +
-                    '"date":"'+result[0].Date+'","mpFname":"'+result[0].FName+'","mpSname":"'+result[0].SName+'","prescid":"'+result[0].PrescriptionID+'","expdate":"'+result[0].ExpiryDate+'", ' +
+                    '"date":"'+result[0].Date+'","mpFname":"'+result[0].FName+'","mpSname":"'+result[0].SName+'","prescid":'+result[0].PrescriptionID+',"expdate":"'+result[0].ExpiryDate+'", ' +
                     '"status":'+result[0].status+', "medicines" : [] }}');
 
                     for (var i = 0; i < result.length; i++) {
 
-                        var medicine = JSON.parse('{"mid":'+result[i].MedicineID+', "quantity":"'+result[i].Quantity+'","comments":"'+result[i].Comments+'", ' +
+                        var medicine = JSON.parse('{"mid":'+result[i].MedicineID+', "quantity":'+result[i].Quantity+',"comments":"'+result[i].Comments+'", ' +
                         '"mName":"'+result[i].Name+'","purpose":"'+result[i].Purpose+'", "type":"'+result[i].Type+'","altNames":"'+result[i].AlsoCalled+'", "mdesc":"'+result[i].Description+'"}');
                         
                         emr['emr'].medicines.push(medicine);
