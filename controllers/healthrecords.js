@@ -185,7 +185,6 @@ exports.getEMR = async function(req, res) {
                         '"mName":"'+result[i].Name+'","purpose":"'+result[i].Purpose+'", "type":"'+result[i].Type+'","altNames":"'+result[i].AlsoCalled+'", "mdesc":"'+result[i].Description+'"}');
                         
                         emr['emr'].medicines.push(medicine);
-                        o[key].push(medicine);
                     
                     }
                         console.log(emr);
