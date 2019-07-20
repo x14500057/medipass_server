@@ -148,10 +148,6 @@ exports.getConsultations = async function(req, res) {
 exports.getEMR = async function(req, res) {
 
     const cId= req.params.cId;
-    let o = {} // empty Object
-    let key = 'emr';
-    o[key] = []; // empty Array, which you can push() values into
-    
     const sqlQuery = `Select c.*, mp.MedPractionerID, mp.FName, mp.SName, p.*, pm.*, m.*
                         From Consultation AS c 
                         Left Join MedicalPractioner AS mp
@@ -164,17 +160,9 @@ exports.getEMR = async function(req, res) {
                         ON m.MedicineID = pm.MedicineID
                         WHERE c.ConsultationID = ?`;
 
-    // //Key relations, Define each table's primary and foreign keys
-    var nestingOptions = [
-        { tableName : 'c', pkey: 'ConsultationID', fkeys:[{table:'mp',col:'MedPractionerID'}]},
-        { tableName : 'mp', pkey: 'MedPractionerID'},
-        { tableName : 'p', pkey: 'PrescriptionID', fkeys:[{table:'c',col:'ConsultationID'}]},
-        { tableName : 'pm', pkey: 'MedicineID', fkeys:[{table:'p',col:'PrescriptionID'},{table:'m',col:'MedicineID'}]},
-        { tableName : 'm', pkey: 'MedicineID'}  
-    ];
-
     try {
-        connection.query({sql: sqlQuery, nestTables: true}, [cId], function (err, rows) {
+
+        await connection.query(sqlQuery, [cId],  (err, result, fields) => {
 
             // error handling
             if (err){
@@ -183,18 +171,66 @@ exports.getEMR = async function(req, res) {
             }
 
             else {
-                var nestedRows = func.convertToNested(rows, nestingOptions);
                 
-                o[key] = nestedRows;
-                console.log(o);
-                // res.send(JSON.stringify(nestedRows));
-                res.send(o);
-            }
-        
-        });
-    } catch (error) {
+            
+                    var emr = JSON.parse('{"emr":' +
+                    '{"cid":"'+result[0].ConsultationID+'","pid":"'+result[0].PatientID+'","mpid":"'+result[0].MedPractionerID+'","symptoms":"'+result[0].Symptoms+'", ' +
+                    '"diagnostics":"'+result[0].Diagnostic+'","treatments":"'+result[0].Treatment+'","bpressure":"'+result[0].BPressure+'","notes":"'+result[0].Notes+'", ' +
+                    '"date":"'+result[0].Date+'","mpFname":"'+result[0].FName+'","mpSname":"'+result[0].SName+'","prescid":"'+result[0].PrescriptionID+'","expdate":"'+result[0].ExpiryDate+'", ' +
+                    '"status":'+result[0].status+', "medicines" : [] }}');
 
+                    for (var i = 0; i < result.length; i++) {
+
+                        var medicine = JSON.parse('{"mid":'+result[i].MedicineID+', "quantity":"'+result[i].Quantity+'","comments":"'+result[i].Comments+'", ' +
+                        '"mName":"'+result[i].Name+'","purpose":"'+result[i].Purpose+'", "type":"'+result[i].Type+'","altNames":"'+result[i].AlsoCalled+'", "mdesc":"'+result[i].Description+'"}');
+                        
+                        emr['emr'].medicines.push(medicine);
+                        o[key].push(medicine);
+                    
+                    }
+                        console.log(emr);
+                        res.status(200).send(emr);
+                }
+         });
+
+        } catch (error) {
+        
+        res.status(400).send(error);
     }
+
+
+    //Big O notation reduced by three nested arrays !! - way more efficient 
+    // // //Key relations, Define each table's primary and foreign keys
+    // var nestingOptions = [
+    //     { tableName : 'c', pkey: 'ConsultationID', fkeys:[{table:'mp',col:'MedPractionerID'}]},
+    //     { tableName : 'mp', pkey: 'MedPractionerID'},
+    //     { tableName : 'p', pkey: 'PrescriptionID', fkeys:[{table:'c',col:'ConsultationID'}]},
+    //     { tableName : 'pm', pkey: 'MedicineID', fkeys:[{table:'p',col:'PrescriptionID'},{table:'m',col:'MedicineID'}]},
+    //     { tableName : 'm', pkey: 'MedicineID'}  
+    // ];
+
+    // try {
+    //     connection.query({sql: sqlQuery, nestTables: true}, [cId], function (err, rows) {
+
+    //         // error handling
+    //         if (err){
+    //             console.log('Internal error: ', err);
+    //             res.send("Mysql query execution error!");
+    //         }
+
+    //         else {
+    //             var nestedRows = func.convertToNested(rows, nestingOptions);
+                
+    //             o[key] = nestedRows;
+    //             console.log(o);
+    //             // res.send(JSON.stringify(nestedRows));
+    //             res.send(o);
+    //         }
+        
+    //     });
+    // } catch (error) {
+
+    // }
 };
 
 // Get Patient Medicine History
