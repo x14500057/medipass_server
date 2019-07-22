@@ -87,10 +87,7 @@ exports.createMediRing = async function(req, res ) {
 exports.getMediRing = async function(req, res ) {
 
     const pid = req.params.pid;
-    let o = {};
-    let key = "myMediKey";
-    o[key] = [];
-
+    
     const getMediRingSQL = 'Select MediKey, status from MediRing Where PatientID = ? && status = 1'
 
     connection.query(getMediRingSQL, [pid], function(err, result, fields) {
@@ -99,8 +96,11 @@ exports.getMediRing = async function(req, res ) {
             res.status(400).send('Add MediKey ERROR: ', err);
         });
 
-        o[key].push(result[0]);
-    console.log(result);
-    res.status(201).send(o);
+        const myMediRing = JSON.parse('{"myMediRing":' +
+                    '{"medikey":"'+result[0].MediKey+'","status":'+result[0].status+'}}');
+
+        
+    console.log(myMediRing);
+    res.status(201).send(myMediRing);
     });
 };
