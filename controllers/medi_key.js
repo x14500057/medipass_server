@@ -60,8 +60,8 @@ function checkHashPassword(user_password, salt) {
     return passwordData;
 }
 
-// Register User
-exports.syncMediRing = async function(req, res ) {
+//CreateMediRing
+exports.createMediRing = async function(req, res ) {
 
     const pid = req.params.pid
 
@@ -74,12 +74,30 @@ exports.syncMediRing = async function(req, res ) {
 
     const addMediKeySQL = 'INSERT INTO `MediRing`(`MediRingID`, `MediKey`, `status`, `PatientID`) VALUES (?,?,?,?)';
 
-    connection.query(addMediKeySQL, [null,mediKey, 1, pid], function(err, result, fields) {
+    connection.query(addMediKeySQL, [null, mediKey, 0, pid], function(err, result, fields) {
         connection.on('ERROR', function(err) {
             console.log('[MySQL ERROR', err);
             res.status(400).send('Add MediKey ERROR: ', err);
         });
     console.log('MediKey Successfully Added');
     res.status(201).send(mediKey);
+    });
+};
+
+exports.getMediRing = async function(req, res ) {
+
+    const pid = req.params.pid
+
+    const getMediRingSQL = 'Select MediKey, status from MediRing Where PatientID = ? && status = 1'
+
+    connection.query(getMediRingSQL, [pid], function(err, result, fields) {
+        connection.on('ERROR', function(err) {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Add MediKey ERROR: ', err);
+        });
+
+        
+    console.log(result);
+    res.status(201).send(result);
     });
 };

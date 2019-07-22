@@ -76,7 +76,9 @@ router.route('/user/:pid/alterConnection/:mpid/:consentStatus').get(userControll
 
 
 // //MediKey Routes
-router.route("/user/:pid/syncMediRing/").get(mediKeyController.syncMediRing);
+router.route("/user/:pid/getMediRing/").get(mediKeyController.getMediRing);
+
+router.route("/user/:pid/createMediRing/").get(mediKeyController.createMediRing);
 
 
 // //Health Records Info Routes
