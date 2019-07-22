@@ -63,9 +63,7 @@ function checkHashPassword(user_password, salt) {
 // Register User
 exports.syncMediRing = async function(req, res ) {
 
-    const pid = req.params.pid;
-    const rbody = req.body;
-    const user_password = rbody.password;
+    const pid = req.params.pid
 
 
     const hash_data = saltHashMediKey(pid);
