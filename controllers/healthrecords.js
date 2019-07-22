@@ -107,8 +107,9 @@ exports.getPrescriptions = async function(req, res) {
 // Get All Consultations
 exports.getConsultations = async function(req, res) {
 
-    //Get Patient ID from HTTP Request
+    // //Get Patient ID from HTTP Request
     const pId = req.params.pId;
+
 
     let o = {} // empty Object
     let key = 'Consultations';
@@ -143,6 +144,7 @@ exports.getConsultations = async function(req, res) {
 
     console.log('Query Finished');
 };
+
 
 // Get Whole EMR (Electronic Medical Record) - Consulatation, MedicalPractioner, Prescription, prescriptionMedicine, Medicine
 exports.getEMR = async function(req, res) {
@@ -187,7 +189,7 @@ exports.getEMR = async function(req, res) {
                         emr['emr'].medicines.push(medicine);
                     
                     }
-                        console.log(emr);
+                        // console.log(emr);
                         res.status(200).send(emr);
                 }
          });

@@ -1,7 +1,7 @@
 //Controllers
 const userController = require('./controllers/users');
 const ehrsController = require('./controllers/healthrecords');
-// const mediKeyController = require('./controllers/medi_key');
+const mediKeyController = require('./controllers/medi_key');
 
 //Modules
 const express = require("express");
@@ -76,7 +76,7 @@ router.route('/user/:pid/alterConnection/:mpid/:consentStatus').get(userControll
 
 
 // //MediKey Routes
-// router.route("/user/:pid/syncMediRing/").post(mediKeyController.syncMediRing);
+router.route("/user/:pid/syncMediRing/").post(mediKeyController.syncMediRing);
 
 
 // //Health Records Info Routes

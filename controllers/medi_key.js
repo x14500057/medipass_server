@@ -1,9 +1,34 @@
 const crypto = require('crypto');
 const mysql = require("mysql");
-const dbconfig = require('../config/database').default;
-const connection = mysql.createConnection(dbconfig.connection);
 
-connection.query('USE ' + dbconfig.database);
+
+function handleDisconnect() {
+    connection = mysql.createConnection({
+        host: 'us-cdbr-iron-east-02.cleardb.net',
+        user: 'b795f1a2ae3d32',
+        password: 'a7fa35f1',
+        database: 'heroku_5964b350e9e6f96'
+    });                                           // Recreate the connection, since
+    // the old one cannot be reused.
+
+    connection.connect(function (err) {              // The server is either down
+        if (err) {                                     // or restarting (takes a while sometimes).
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+        }                                     // to avoid a hot loop, and to allow our node script to
+    });                                     // process asynchronous requests in the meantime.
+    // If you're also serving http, display a 503 error.
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            throw err;                                  // server variable configures this)
+        }
+    });
+}
+
+handleDisconnect();
 
 //MediKey Util
 var genRandomString = function(length) {
@@ -41,9 +66,9 @@ exports.syncMediRing = async function(req, res ) {
     const pid = req.params.pid;
     const rbody = req.body;
     const user_password = rbody.password;
-    const user_code = rbody.code;
 
-    const hash_data = saltHashMediKey(user_code);
+
+    const hash_data = saltHashMediKey(pid);
     const mediKey = hash_data.valueHash;
 
     // res.status(200).send('pid:'+pid+' mediKey:' +mediKey);
