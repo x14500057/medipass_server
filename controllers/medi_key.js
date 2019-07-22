@@ -74,46 +74,14 @@ exports.syncMediRing = async function(req, res ) {
     // res.status(200).send('pid:'+pid+' mediKey:' +mediKey);
     // console.log('pid:'+pid+' mediKey:' +mediKey);
 
-    const checkUser_sql = 'Select * From PatientAuth Where PatientID = ?';
     const addMediKeySQL = 'INSERT INTO `MediRing`(`MediRingID`, `MediKey`, `status`, `PatientID`) VALUES (?,?,?,?)';
 
-    await connection.query(checkUser_sql, [pid], function(err, result, fields) {
-        connection.on('Error', function(err) {
+    connection.query(addMediKeySQL, [null,mediKey, 1, pid], function(err, result, fields) {
+        connection.on('ERROR', function(err) {
             console.log('[MySQL ERROR', err);
-            res.status(400).send('Registration ERROR: ', err);
+            res.status(400).send('Add MediKey ERROR: ', err);
         });
-
-        //If User Found
-        if (result && result.length) {
-
-            const salt = result[0].salt; //Get Salt of account if exists.
-            const pass = result[0].Password //Get password of account if exists;
-
-            //Hash Password from login request with salt in Database.
-            const hashed_pass = checkHashPassword(user_password, salt).valueHash;
-            if(pass == hashed_pass) {
-                connection.query(addMediKeySQL, [null,mediKey, 1, pid], function(err, result, fields) {
-                    connection.on('ERROR', function(err) {
-                        console.log('[MySQL ERROR', err);
-                        res.status(400).send('Add MediKey ERROR: ', err);
-                    });
-                console.log('MediKey Successfully Added');
-                res.status(201).send('MediKey Added :' +mediKey);
-                });
-            }
-            else {
-                console.log(result);
-
-                res.status(404).send(JSON.stringify('Wrong Password'));
-            } 
-        }
-        else {
-            console.log('Not Found');
-            res.status(404).send('Invalid Credentials');
-        }
+    console.log('MediKey Successfully Added');
+    res.status(201).send(mediKey);
     });
-
-
-
-    
 };
