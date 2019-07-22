@@ -80,6 +80,8 @@ router.route("/user/:pid/getMediRing/").get(mediKeyController.getMediRing);
 
 router.route("/user/:pid/createMediRing/").get(mediKeyController.createMediRing);
 
+router.route("/user/:pid/deactivateMediRing/").put(mediKeyController.deactivateMediRing);
+
 
 // //Health Records Info Routes
 // router.route("/validprescriptions/:pId").get(ehrsController.getValidPrescriptions);

@@ -88,7 +88,7 @@ exports.getMediRing = async function(req, res ) {
 
     const pid = req.params.pid;
     
-    const getMediRingSQL = 'Select MediKey, status from MediRing Where PatientID = ? && status = 1'
+    const getMediRingSQL = 'SELECT MediRingID, MediKey, status FROM MediRing where PatientID = ? order by MediRingID DESC LIMIT 1'
 
     connection.query(getMediRingSQL, [pid], function(err, result, fields) {
         connection.on('ERROR', function(err) {
@@ -98,6 +98,26 @@ exports.getMediRing = async function(req, res ) {
 
         const myMediRing = JSON.parse('{"myMediRing":' +
                     '{"medikey":"'+result[0].MediKey+'","status":'+result[0].status+'}}');
+
+        
+    console.log(myMediRing);
+    res.status(201).send(myMediRing);
+    });
+};
+
+exports.deactivateMediRing = async function(req, res ) {
+
+    const pid = req.params.pid;
+    const deactSql = `UPDATE MediRing SET status = '0' WHERE PatientID = ? && status = 1`
+
+    connection.query(deactSql, [pid], function(err, result, fields) {
+        connection.on('ERROR', function(err) {
+            console.log('[MySQL ERROR', err);
+            res.status(400).send('Deactivate MediKey ERROR: ', err);
+        });
+
+        const myMediRing = JSON.parse('{"myMediRing":' +
+                    '{"status":0}}');
 
         
     console.log(myMediRing);
