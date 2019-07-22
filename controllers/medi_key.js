@@ -115,7 +115,7 @@ exports.alterMediRingStatus = async function(req, res ) {
         newStatus = 0;
     }
     else {
-        newStatus = 1
+        newStatus = 1;
     }
     const deactSql = `UPDATE MediRing SET status = '0' WHERE PatientID = ? && status = ?`
 
