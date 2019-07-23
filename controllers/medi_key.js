@@ -97,7 +97,7 @@ exports.getMediRing = async function(req, res ) {
         });
 
         const myMediRing = JSON.parse('{"myMediRing":' +
-                    '{"medikey":"'+result[0].MediKey+'","status":'+result[0].status+'}}');
+                    '{"mediringid":'+result[0].MediRingID+',"medikey":"'+result[0].MediKey+'","status":'+result[0].status+'}}');
 
         
     console.log(myMediRing);
@@ -117,13 +117,15 @@ exports.alterMediRingStatus = async function(req, res ) {
     else {
         newStatus = 1;
     }
-    const deactSql = `UPDATE MediRing SET status = '0' WHERE PatientID = ? && status = ?`
+    const deactSql = `UPDATE MediRing SET status = ? WHERE MediRingID = ?`
 
     connection.query(deactSql, [pid, newStatus], function(err, result, fields) {
         connection.on('ERROR', function(err) {
             console.log('[MySQL ERROR', err);
             res.status(400).send('Deactivate MediKey ERROR: ', err);
         });
+
+        console.log(result);
 
         const myMediRing = JSON.parse('{"myMediRing":' +
                     '{"status":'+newStatus+'}}');
