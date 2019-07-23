@@ -294,6 +294,10 @@ exports.findHealthPactioner = async (req, res) => {
     const sc = connection.escape(req.params.searchContent);
     console.log(sc);
 
+    let o = {} // empty Object
+    let key = 'doctors';
+    o[key] = []; // empty Array, which you can push() values into
+
     const sql = `SELECT MedPractionerID, FName, SName, Email, FieldOdSpecialization, AddressID
                 FROM MedicalPractioner
                 Where FName LIKE '` + req.params.searchContent + `%'
@@ -310,8 +314,15 @@ exports.findHealthPactioner = async (req, res) => {
 
         //If User Found
         if (result && result.length) {
-            console.log('User Found');
-            res.status(200).send(result);
+
+            for(i = 0; i < result.length; i++) {
+                console.log(result[i]);
+                o[key].push(result[i]);
+            }
+
+
+            console.log(o);
+            res.status(200).send(o);
         }
         else {
             console.log('Not Found');
