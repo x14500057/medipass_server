@@ -119,7 +119,7 @@ exports.alterMediRingStatus = async function(req, res ) {
     }
     const deactSql = `UPDATE MediRing SET status = ? WHERE MediRingID = ?`
 
-    connection.query(deactSql, [mdid, newStatus], function(err, result, fields) {
+    connection.query(deactSql, [newStatus, mdid], function(err, result, fields) {
         connection.on('ERROR', function(err) {
             console.log('[MySQL ERROR', err);
             res.status(400).send('Deactivate MediKey ERROR: ', err);
