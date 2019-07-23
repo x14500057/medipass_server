@@ -295,7 +295,7 @@ exports.findHealthPactioner = async (req, res) => {
     console.log(sc);
 
     const sql = `SELECT MedPractionerID, FName, SName, Email, FieldOdSpecialization, AddressID
-                FROM medipassdb.MedicalPractioner
+                FROM MedicalPractioner
                 Where FName LIKE '` + req.params.searchContent + `%'
                 OR SName Like '` + req.params.searchContent + `%'
                 OR Email Like  '` + req.params.searchContent + `%'`;
