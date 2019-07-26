@@ -419,8 +419,12 @@ exports.alterConnectionConsent = async (req, res) => {
         await connection.query(sql, [newStatus, pid, mpid], (err, result, fields) => {
 
             if (err) throw err;
+
+            var status = JSON.parse('{"connectionStatus":' +
+                    '{"newStatus":1}}');
+                     
             console.log(result.affectedRows + " record(s) updated");
-            res.status(200).send('Consent Changed');
+            res.status(200).send(status);
         });
 
     } catch (error) {
