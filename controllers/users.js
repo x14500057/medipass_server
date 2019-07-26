@@ -354,6 +354,11 @@ exports.addConnection = async (req, res) => {
 
 //View Connections
 exports.viewConnections = async (req, res) => {
+
+    let o = {} // empty Object
+    let key = 'myDoctors';
+    o[key] = []; // empty Array, which you can push() values into
+
     const pid = req.params.pid;
     const sql = `select * from Connection as c
                 Join MedicalPractioner as mp
@@ -370,8 +375,17 @@ exports.viewConnections = async (req, res) => {
         //If Connections found
         if (result && result.length) {
             console.log(result);
-            res.status(200).send(result);
+
+            for(i = 0; i < result.length; i++) {
+                console.log(result[i]);
+                o[key].push(result[i]);
+            }
+
+            console.log(o);
+            res.status(200).send(o);
         }
+
+        
 
         //If No Connections
         else {
