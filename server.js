@@ -72,7 +72,7 @@ router.route("/user/:pid/addConnection/:mpid").get(userController.addConnection)
 
 router.route("/user/:pid/connections").get(userController.viewConnections);
 
-router.route('/user/:pid/connection/:cid/alterConsent/:status').get(userController.alterConnectionConsent);
+router.route('/user/:pid/connection/alterConsent').post(userController.alterConnectionConsent);
 
 
 // //MediKey Routes

@@ -398,13 +398,25 @@ exports.viewConnections = async (req, res) => {
 //Alter Consent on Connection
 exports.alterConnectionConsent = async (req, res) => {
     const pid = req.params.pid;
-    const mpid = req.params.mpid;
-    const cs = req.params.consentStatus;
+    const mpid = req.body.mpid;
+    const cs = req.body.status;
+    let newStatus = 0;
+
+    if(cs == 1) {
+        newStatus = 0;
+        console.log("Consent for user: "+pid+ "Has changed to"+ newStatus)
+    }
+    else {
+        newStatus = 1;
+        console.log("Consent for user: "+pid+ "Has changed to"+ newStatus)
+    }
+
+
     const sql = `Update Connection Set ConsentStatus = ? Where PatientID = ? AND MedicalPractionerID = ?`;
 
     try {
 
-        await connection.query(sql, [cs, pid, mpid], (err, result, fields) => {
+        await connection.query(sql, [newStatus, pid, mpid], (err, result, fields) => {
 
             if (err) throw err;
             console.log(result.affectedRows + " record(s) updated");
