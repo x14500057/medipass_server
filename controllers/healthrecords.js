@@ -71,8 +71,14 @@ exports.getValidPrescriptions = async (req, res) => {
 //Get All Prescriptions
 exports.getPrescriptions = async function(req, res) {
 
+    console.log("working");
+
     //Get Patient ID from HTTP REQUEST
-    const pId = req.params.pId;
+    const pid = req.params.pid;
+
+    let o = {} // empty Object
+    let key = 'prescriptions';
+    o[key] = []; // empty Array, which you can push() values into
 
     //Construct SQL Query
     const sql = `SELECT p.PrescriptionID, p.ExpiryDate, p.Status, mp.FNAME, mp.Sname, pm.MedicineID, pm.Quantity, m.Name, m.Type
@@ -85,14 +91,29 @@ exports.getPrescriptions = async function(req, res) {
                 ON pm.PrescriptionID = p.PrescriptionID 
                 LEFT JOIN Medicine AS m
                 ON m.MedicineID = pm.MedicineID
-                WHERE PatientID = `+pId+` 
+                WHERE PatientID = ?
                 ORDER BY ExpiryDate DESC;`;
 
     try {
 
-        const data = await connection.query(sql);
-        console.log(data);
-        res.status(200).send(data);
+        connection.query(sql, [pid], (error, result, fields) => {
+            if(error) throw error;
+
+            for(i = 0; i < result.length; i++) {
+
+                // if(!result[i].PrescriptionID.equals(null)) {
+                //     console.log("null");
+                // }
+                if(result[i].PrescriptionID != null) {
+                    console.log(result[i]);
+                    o[key].push(result[i]);
+                };
+                // o[key].push(result[i]);
+            }
+            console.log(o);
+            res.status(200).send(o);
+
+        });
         
     } catch (error) {
         
@@ -173,8 +194,7 @@ exports.getEMR = async function(req, res) {
             }
 
             else {
-                
-            
+
                     var emr = JSON.parse('{"emr":' +
                     '{"cid":"'+result[0].ConsultationID+'","pid":'+result[0].PatientID+',"mpid":'+result[0].MedPractionerID+',"symptoms":"'+result[0].Symptoms+'", ' +
                     '"diagnostics":"'+result[0].Diagnostic+'","treatments":"'+result[0].Treatment+'","bpressure":"'+result[0].BPressure+'","notes":"'+result[0].Notes+'", ' +

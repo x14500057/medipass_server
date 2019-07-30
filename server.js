@@ -42,21 +42,18 @@ app.get('/emergency/:number/', (req, res) => {
 });
 
 
+app.get('/', async (req, res) => {
 
-// app.get('/', async (req, res) => {
+    res.status(200).send('Welcome to MediPass API');
+    console.log('MediPass API');
 
-//     res.status(200).send('Welcome to MediPass API');
-//     console.log('MediPass API');
-
-// })
+})
 
 app.use("/api", router);
 
-// //User Profile Info Routes
+//User Profile Info Routes
 
 router.route("/register/").post(userController.registerUser);
-
-// router.route("/login/:email/:password").get(userController.loginUser);
 
 router.route("/login").post(userController.loginUser);
 
@@ -86,7 +83,7 @@ router.route("/mediring/:mdid/alterStatus/:status").put(mediKeyController.alterM
 // //Health Records Info Routes
 // router.route("/validprescriptions/:pId").get(ehrsController.getValidPrescriptions);
 
-// router.route("/prescriptions/:pId").get(ehrsController.getPrescriptions);
+router.route("/user/:pid/prescriptions").get(ehrsController.getPrescriptions);
 
 router.route("/user/:pId/consultations").get(ehrsController.getConsultations);
 
