@@ -81,7 +81,7 @@ exports.getPrescriptions = async function(req, res) {
     o[key] = []; // empty Array, which you can push() values into
 
     //Construct SQL Query
-    const sql = `SELECT p.PrescriptionID, p.ExpiryDate, p.Status, mp.FNAME, mp.Sname, pm.MedicineID, pm.Quantity, m.Name, m.Type
+    const sql = `SELECT p.PrescriptionID, p.ExpiryDate, p.Status, mp.Fname, mp.Sname, pm.MedicineID, pm.Quantity, m.Name, m.Type
                 From Consultation AS c 
                 Left Join MedicalPractioner AS mp
                 ON c.MedPractionerID = mp.MedPractionerID 
