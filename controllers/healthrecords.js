@@ -282,3 +282,73 @@ exports.getPatientMedicineHistory = async function(req, res) {
         }
     });
 };
+
+//Get All Valid Prescriptions
+exports.getProfileStats = async (req, res) => {
+
+    //Get Patient ID from HTTP REQUEST
+    const pId = req.params.pId;
+    console.log(pId);
+
+    //Construct SQL Query
+    const sql = `SELECT p.PrescriptionID, p.ExpiryDate, mp.FNAME, mp.Sname, pm.MedicineID, pm.Quantity, m.Name, m.Type
+                From Consultation AS c 
+                Left Join MedicalPractioner AS mp
+                ON c.MedPractionerID = mp.MedPractionerID 
+                LEFT JOIN Prescription AS p
+                ON c.ConsultationID = p.ConsultationID 
+                LEFT JOIN PrescriptionMedicine AS pm
+                ON pm.PrescriptionID = p.PrescriptionID 
+                LEFT JOIN Medicine AS m
+                ON m.MedicineID = pm.MedicineID
+                WHERE PatientID = ?
+                AND p.ExpiryDate > CURDATE() 
+                AND p.status = 1 
+                ORDER BY ExpiryDate DESC;`;
+
+    try {
+
+        await connection.query(sql, [pId], (err, result, fields) => {
+            if (err) throw err;
+            console.log(result);
+            res.status(200).send(result);
+        });
+
+        } catch (error) {
+            console.log('ERROR', error);
+            res.status(400).send(error);
+        }
+};
+
+    // const countConnectionsSQL = "Select count(patientID) From connection where PatientID = ? and ConsentStatus = 1";
+    // const countConsultationSQL = 'SELECT COUNT(ConsultationID) FROM consultation WHERE PatientID = ?'
+
+
+    // try {
+
+    //     await connection.query(countConnectionsSQL, [pid], (err, result, fields) => {
+
+    //         // error handling
+    //         if (err) {
+    //             console.log('Internal error: ', err);
+    //             res.send("Mysql query execution error!", err);
+    //         }
+
+    //         else {
+
+    //             console.log(result);
+
+
+
+
+
+
+    //         }
+
+    //         var stats = JSON.parse('{"stats":' + '{"doctorsCount":' + result[0].dCount + ',"consultationscount":' + result[0].cCountpiryDate + '}}');
+    //     });
+
+    // } catch (error) {
+
+    //     res.status(400).send(error);
+    // }

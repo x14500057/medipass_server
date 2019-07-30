@@ -71,6 +71,9 @@ router.route("/user/:pid/connections").get(userController.viewConnections);
 
 router.route('/user/:pid/connection/alterConsent').post(userController.alterConnectionConsent);
 
+router.route('/user/:pid/profileStats/').get(userController.getProfileStats);
+
+
 
 // //MediKey Routes
 router.route("/user/:pid/getMediRing/").get(mediKeyController.getMediRing);

@@ -434,6 +434,60 @@ exports.alterConnectionConsent = async (req, res) => {
     }
 };
 
+exports.getProfileStats = async (req, res) => {
+
+    const pid = req.params.pid;
+
+    console.log("working");
+
+    const countConnectionsSQL = "Select count(patientID) as doctorCount From connection where PatientID = ? and ConsentStatus = 1";
+    const countConsultationSQL = 'SELECT COUNT(ConsultationID) as countC FROM consultation WHERE PatientID = ?'
+
+
+    try {
+
+        await connection.query(countConnectionsSQL, [pid], (err, result, fields) => {
+
+            // error handling
+            if (err) {
+                console.log('Internal error: ', err);
+                res.send("Mysql query execution error!", err);
+            }
+
+            else {
+
+                let countD = result[0].doctorCount;
+
+                connection.query(countConsultationSQL, [pid], (err, result, fields) => {
+
+                    // error handling
+                    if (err) {
+                        console.log('Internal error: ', err);
+                        res.send("Mysql query execution error!", err);
+                    }
+
+                    else {
+                        
+                        let countC = result[0].countC;
+                        console.log(countC);
+                        var stats = JSON.parse(`{"stats": {"countD":`+countD+`, "countC": `+countC+`}}`);
+
+                    }
+
+                console.log(stats);
+                res.status(200).send(stats);
+
+            });
+        }
+
+    });
+
+    } catch (error) {
+
+        res.status(400).send(error);
+    }
+};
+
 ////////////////////////////
 //Validation Utils -- >
 ////////////////////////////
