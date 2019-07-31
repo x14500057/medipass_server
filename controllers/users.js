@@ -488,11 +488,101 @@ exports.getProfileStats = async (req, res) => {
     }
 };
 
+exports.addEmergencyContacts = async (req, res) => {
+    const pid = req.params.pid;          //get patient id from request header
+    const phNumber = req.body.phoneNo;   //get the contact number from request
+    const cName = req.body.cName;        //get the contact name from request
+
+    const formattedNo = formatNumber(phNumber); //pass number into number formatter
+
+    console.log(formattedNo);
+
+    const addContactSQL = `INSERT INTO contacts(contactID,patientID,phNumber,contactName) VALUES (null, ?, ?, ?)`; //SQL Query for add cemergency contact
+    
+
+    try {
+
+        connection.query(addContactSQL, [pid, formattedNo, cName], (error, result, fields) => {
+
+            // error handling
+            if (error) {
+                console.log('Internal error: ', error);
+                res.send("Mysql query execution error!", error);
+            }
+
+            else  {
+                console.log("contact successfully added");
+                res.status(201).send("contact successfully added");
+            }
+        })
+
+    }catch (error) {
+        res.status(400).send(error);
+    }
+    
+}
+
+exports.getEmergencyContacts = async (req, res) => {
+
+    const pid = req.params.pid; // Get patient id from request
+    const allContactsSQL = `Select * From contacts Where PatientID = ?`; //SQL Query getting all contacts belonging to patient
+
+    let o = {} // empty Object
+    let key = 'myContacts';
+    o[key] = []; // empty Array, which you can push() values into
+
+    try {
+
+        connection.query(allContactsSQL, [pid], (error, result, fields) => {
+
+            if(error) {
+                console.log('Internal error: ', error);
+                res.send("Mysql query execution error!", error);
+            }
+            else {
+
+                //If Connections found
+                if (result && result.length) {
+                    console.log(result);
+
+                    for(i = 0; i < result.length; i++) {
+                        console.log(result[i]);
+                        o[key].push(result[i]);
+                    }
+
+                    console.log(o);
+                    res.status(200).send(o);
+                }
+                
+            }
+        })
+    } catch (error) {
+        console.log("error: ", error);
+        res.status(400).send("error: ", error);
+    }
+}
+
 ////////////////////////////
 //Validation Utils -- >
 ////////////////////////////
 
+//Format Phone Number Function
+function formatNumber(phNumber) {
 
+    var phNo = phNumber.toString();
+    var prefix = "353";
+
+    if(phNo.charAt(0)== "0") {
+
+        phNo = phNo.slice(1);
+        const formattedNo = (prefix+phNo)
+        
+        return formattedNo;
+    }
+    else {
+        return phNo;
+    }
+}
 //Validate Email Address Util
 function validateEmail(email) {
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {

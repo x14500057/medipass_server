@@ -26,6 +26,7 @@ app.get('/emergency/:number/', (req, res) => {
     const number = req.params.number;
     const text = 'MediPass - Emergency \n\nToni Byrne has been in an accident at \n\n3 Knockabawn, \nQuay Road,\nRush,\nCo.Dublin\n\n';
 
+    //format 353 -[0] /860811116
     nexmo.message.sendSms(
         'Emergency MEDIPASS', number, text, {type: 'unicode'},
         (err, responseData) => {
@@ -72,6 +73,10 @@ router.route("/user/:pid/connections").get(userController.viewConnections);
 router.route('/user/:pid/connection/alterConsent').post(userController.alterConnectionConsent);
 
 router.route('/user/:pid/profileStats/').get(userController.getProfileStats);
+
+router.route('/user/:pid/addContact').post(userController.addEmergencyContacts);
+
+router.route('/user/:pid/getAllContacts').get(userController.getEmergencyContacts);
 
 
 
