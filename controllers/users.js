@@ -602,13 +602,13 @@ exports.createEmergency = async (req, res) => {
                                 const name = result[i].name
                                 const phoneNo = result[i].phoneNo
                                 const text = 'Emergency Alert \n\nHi ' + name + ',\n\nPaul Byrne has been in an accident at \n\n'+ address;
-                                // sendSMS(phoneNo, text, (error, response) => {
-                                //     if (error) { console.log(error) }
+                                sendSMS(phoneNo, text, (error, response) => {
+                                    if (error) { console.log(error) }
 
-                                //     if (response && response.length) {
-                                //         console.log(name + "recieved message");
-                                //     }
-                                // });
+                                    if (response && response.length) {
+                                        console.log(name + "recieved message");
+                                    }
+                                });
                                 console.log(text);
                             }
                         }
@@ -621,26 +621,6 @@ exports.createEmergency = async (req, res) => {
     }
 }
 
-// exports.test = async (req, res) => {
-
-
-//     var lat = req.body.lat;
-//     var long = req.body.long;
-
-//     console.log(lat);
-//     console.log(long);
-
-//     const place = getPlace(lat, long, (error, address) => {
-//         if(error) {console.log(error)}
-
-//         if (address && address.length) {
-//             console.log(address);
-//         }
-//     });
-
-//     res.status(200).send(place)
-
-// };
 ////////////////////////////
 //Validation Utils -- >
 ////////////////////////////
