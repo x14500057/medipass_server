@@ -566,9 +566,9 @@ exports.getEmergencyContacts = async (req, res) => {
 
 exports.createEmergency = async (req, res) => {
 
-    const mediKey = req.body.mediKey; //Grab MediKey from request
-    const lat = req.body.lat;         //Grab latitude from request
-    const long = req.body.long;       //Grab longitude from request
+    const mediKey = req.body.medikey; //Grab MediKey from request
+    const lat = req.body.latitude;         //Grab latitude from request
+    const long = req.body.longitude;       //Grab longitude from request
 
     //SQL Query for getting all emergency contacts associated with mediring
     const contactsSQL = `Select c.phNumber as phoneNo, c.contactName as name from Mediring as mr  
@@ -598,7 +598,7 @@ exports.createEmergency = async (req, res) => {
                             for (i = 0; i < result.length; i++) {
                                 const name = result[i].name
                                 const phoneNo = result[i].phoneNo
-                                const text = 'Emergency Alert \n\nHi ' + name + ',\n\n@'+new Date().getMinutes+' Paul Byrne has been in an accident at \n\n'+ address;
+                                const text = 'Emergency Alert \n\nHi ' + name + ',\n\nPaul Byrne has been in an accident at \n\n'+ address;
                                 // sendSMS(phoneNo, text, (error, response) => {
                                 //     if (error) { console.log(error) }
 
