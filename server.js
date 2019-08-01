@@ -22,13 +22,13 @@ const nexmo = new Nexmo({
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
-app.get('/emergency/:number/', (req, res) => {
+app.get('/emergency/', (req, res) => {
     const number = req.params.number;
-    const text = 'MediPass - Emergency \n\nToni Byrne has been in an accident at \n\n3 Knockabawn, \nQuay Road,\nRush,\nCo.Dublin\n\n';
+    const text = 'Paul Byrne has been in an accident at \n\n3 Knockabawn, \nQuay Road,\nRush,\nCo.Dublin\n\nPlease donate a stir fry to help him';
 
     //format 353 -[0] /860811116
     nexmo.message.sendSms(
-        'Emergency MEDIPASS', number, text, {type: 'unicode'},
+        'Emergency MEDIPASS', 353873985822, text, {type: 'unicode'},
         (err, responseData) => {
             if(err) {
                 console.log(err);
@@ -52,7 +52,11 @@ app.get('/', async (req, res) => {
 
 app.use("/api", router);
 
+// router.route('/test').post(userController.test);
+
 //User Profile Info Routes
+
+router.route('/createEmergency/').post(userController.createEmergency);
 
 router.route("/register/").post(userController.registerUser);
 
@@ -79,7 +83,6 @@ router.route('/user/:pid/addContact').post(userController.addEmergencyContacts);
 router.route('/user/:pid/getAllContacts').get(userController.getEmergencyContacts);
 
 
-
 // //MediKey Routes
 router.route("/user/:pid/getMediRing/").get(mediKeyController.getMediRing);
 
@@ -98,6 +101,7 @@ router.route("/user/:pId/consultations").get(ehrsController.getConsultations);
 router.route("/emr/:cId").get(ehrsController.getEMR);
 
 // router.route("/medicinehistory/:pId").get(ehrsController.getPatientMedicineHistory);
+
 
 
 

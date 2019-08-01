@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const mysql = require("mysql");
+const Nexmo = require('nexmo');
+const opencage = require('opencage-api-client');
 let connection;
 
 function handleDisconnect() {
@@ -315,7 +317,7 @@ exports.findHealthPactioner = async (req, res) => {
         //If User Found
         if (result && result.length) {
 
-            for(i = 0; i < result.length; i++) {
+            for (i = 0; i < result.length; i++) {
                 console.log(result[i]);
                 o[key].push(result[i]);
             }
@@ -376,7 +378,7 @@ exports.viewConnections = async (req, res) => {
         if (result && result.length) {
             console.log(result);
 
-            for(i = 0; i < result.length; i++) {
+            for (i = 0; i < result.length; i++) {
                 console.log(result[i]);
                 o[key].push(result[i]);
             }
@@ -385,7 +387,7 @@ exports.viewConnections = async (req, res) => {
             res.status(200).send(o);
         }
 
-        
+
 
         //If No Connections
         else {
@@ -402,13 +404,13 @@ exports.alterConnectionConsent = async (req, res) => {
     const cs = req.body.status;
     let newStatus = 0;
 
-    if(cs == 1) {
+    if (cs == 1) {
         newStatus = 0;
-        console.log("Consent for user: "+pid+ "Has changed to"+ newStatus)
+        console.log("Consent for user: " + pid + "Has changed to" + newStatus)
     }
     else {
         newStatus = 1;
-        console.log("Consent for user: "+pid+ "Has changed to"+ newStatus)
+        console.log("Consent for user: " + pid + "Has changed to" + newStatus)
     }
 
 
@@ -421,8 +423,8 @@ exports.alterConnectionConsent = async (req, res) => {
             if (err) throw err;
 
             var status = JSON.parse('{"connectionStatus":' +
-                    '{"newStatus":1}}');
-                     
+                '{"newStatus":1}}');
+
             console.log(result.affectedRows + " record(s) updated");
             res.status(200).send(status);
         });
@@ -467,20 +469,20 @@ exports.getProfileStats = async (req, res) => {
                     }
 
                     else {
-                        
+
                         let countC = result[0].countC;
                         console.log(countC);
-                        var stats = JSON.parse(`{"stats": {"countD":`+countD+`, "countC": `+countC+`}}`);
+                        var stats = JSON.parse(`{"stats": {"countD":` + countD + `, "countC": ` + countC + `}}`);
 
                     }
 
-                console.log(stats);
-                res.status(200).send(stats);
+                    console.log(stats);
+                    res.status(200).send(stats);
 
-            });
-        }
+                });
+            }
 
-    });
+        });
 
     } catch (error) {
 
@@ -498,7 +500,7 @@ exports.addEmergencyContacts = async (req, res) => {
     console.log(formattedNo);
 
     const addContactSQL = `INSERT INTO contacts(contactID,patientID,phNumber,contactName) VALUES (null, ?, ?, ?)`; //SQL Query for add cemergency contact
-    
+
 
     try {
 
@@ -510,16 +512,16 @@ exports.addEmergencyContacts = async (req, res) => {
                 res.send("Mysql query execution error!", error);
             }
 
-            else  {
+            else {
                 console.log("contact successfully added");
                 res.status(201).send("contact successfully added");
             }
         })
 
-    }catch (error) {
+    } catch (error) {
         res.status(400).send(error);
     }
-    
+
 }
 
 exports.getEmergencyContacts = async (req, res) => {
@@ -535,7 +537,7 @@ exports.getEmergencyContacts = async (req, res) => {
 
         connection.query(allContactsSQL, [pid], (error, result, fields) => {
 
-            if(error) {
+            if (error) {
                 console.log('Internal error: ', error);
                 res.send("Mysql query execution error!", error);
             }
@@ -545,7 +547,7 @@ exports.getEmergencyContacts = async (req, res) => {
                 if (result && result.length) {
                     console.log(result);
 
-                    for(i = 0; i < result.length; i++) {
+                    for (i = 0; i < result.length; i++) {
                         console.log(result[i]);
                         o[key].push(result[i]);
                     }
@@ -553,7 +555,7 @@ exports.getEmergencyContacts = async (req, res) => {
                     console.log(o);
                     res.status(200).send(o);
                 }
-                
+
             }
         })
     } catch (error) {
@@ -562,6 +564,80 @@ exports.getEmergencyContacts = async (req, res) => {
     }
 }
 
+exports.createEmergency = async (req, res) => {
+
+    const mediKey = req.body.mediKey; //Grab MediKey from request
+    const lat = req.body.lat;         //Grab latitude from request
+    const long = req.body.long;       //Grab longitude from request
+
+    //SQL Query for getting all emergency contacts associated with mediring
+    const contactsSQL = `Select c.phNumber as phoneNo, c.contactName as name from Mediring as mr  
+                 Inner JOIN Contacts as c
+                 ON mr.PatientID = c.PatientID
+                 where mr.status = 1 AND medikey = ?`;
+
+    //SQL Query for creating emergency record
+    const addEmergSQL = `INSERT INTO emergency (emergency_id, medikey, date_occurred, latitude, longitude)
+                         VALUES (null, ?, NOW(), ?, ?)`; 
+
+    try {
+        await connection.query(addEmergSQL, [mediKey, lat, long], (error, result) => {
+            if (error) {console.log('Internal error: ', error)} 
+            else {console.log("Emergency Incident: created");}
+
+
+            connection.query(contactsSQL, [mediKey], (error, result) => {
+                if (error) {
+                    console.log('Internal error: ', error);
+                    res.send("Mysql query execution error!", error);
+                } else {
+                    getPlace(lat, long, (error, address) => {
+                        if (error) { console.log(error) }
+
+                        if (address && address.length) {
+                            for (i = 0; i < result.length; i++) {
+                                const name = result[i].name
+                                const phoneNo = result[i].phoneNo
+                                const text = 'Emergency Alert \n\nHi ' + name + ',\n\n@'+new Date().getMinutes+' Paul Byrne has been in an accident at \n\n'+ address;
+                                // sendSMS(phoneNo, text, (error, response) => {
+                                //     if (error) { console.log(error) }
+
+                                //     if (response && response.length) {
+                                //         console.log(name + "recieved message");
+                                //     }
+                                // });
+                                console.log(text);
+                            }
+                        }
+                    });
+                }
+            })
+        })
+    } catch (error) {
+        res.status(400).send("error" + error);
+    }
+}
+
+// exports.test = async (req, res) => {
+
+
+//     var lat = req.body.lat;
+//     var long = req.body.long;
+
+//     console.log(lat);
+//     console.log(long);
+
+//     const place = getPlace(lat, long, (error, address) => {
+//         if(error) {console.log(error)}
+
+//         if (address && address.length) {
+//             console.log(address);
+//         }
+//     });
+
+//     res.status(200).send(place)
+
+// };
 ////////////////////////////
 //Validation Utils -- >
 ////////////////////////////
@@ -572,11 +648,11 @@ function formatNumber(phNumber) {
     var phNo = phNumber.toString();
     var prefix = "353";
 
-    if(phNo.charAt(0)== "0") {
+    if (phNo.charAt(0) == "0") {
 
         phNo = phNo.slice(1);
-        const formattedNo = (prefix+phNo)
-        
+        const formattedNo = (prefix + phNo)
+
         return formattedNo;
     }
     else {
@@ -629,3 +705,63 @@ function validateSex(sex) {
         return (0);
     }
 }
+
+getPlace = async (lat, long, callback) => {
+
+    let coors = lat + "," + long;
+    console.log(coors);
+    let address = '';
+
+    opencage.geocode({ q: coors, language: 'eng' }).then(data => {
+        // console.log(JSON.stringify(data));
+
+        if (data.status.code == 200) {
+            if (data.results.length > 0) {
+                place = data.results[0];
+                address = place.formatted;
+                // console.log(place.formatted);
+                // console.log(place.components.road);
+                // console.log(place.annotations.timezone.name);
+
+            }
+
+            callback(null, address);
+
+
+
+        } else if (data.status.code == 402) {
+            console.log('hit free-trial daily limit');
+            console.log('become a customer: https://opencagedata.com/pricing');
+        } else {
+            // other possible response codes:
+            // https://opencagedata.com/api#codes
+            console.log('error', data.status.message);
+        }
+    }).catch(error => {
+        console.log('error', error.message);
+    });
+
+}
+
+sendSMS = async (number, text, callback) => {
+
+    //Init Nexmo
+    const nexmo = new Nexmo({
+        apiKey: 'db1d762c',
+        apiSecret: 'BhJoQXQO6zz1nahc'
+    }, { debug: true });
+
+    //Send Message
+    nexmo.message.sendSms(
+        'MEDIPASS', number, text, { type: 'unicode' },
+        (err, responseData) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                console.dir(responseData);
+            }
+        }
+    );
+    callback(err, responseData)
+};
