@@ -570,6 +570,9 @@ exports.createEmergency = async (req, res) => {
     const lat = req.body.latitude;         //Grab latitude from request
     const long = req.body.longitude;       //Grab longitude from request
 
+    console.log("latitude: "+ lat);
+    console.log("longitude:"+ long);
+
     //SQL Query for getting all emergency contacts associated with mediring
     const contactsSQL = `Select c.phNumber as phoneNo, c.contactName as name from Mediring as mr  
                  Inner JOIN Contacts as c
