@@ -2,10 +2,12 @@
 const userController = require('./controllers/users');
 const ehrsController = require('./controllers/healthrecords');
 const mediKeyController = require('./controllers/medi_key');
+const healthPractitionersController = require('./controllers/healthPractitioners');
 
 //Modules
 const express = require("express");
 const bodyParser = require('body-parser');
+const cors = require('cors')
 
 const Nexmo = require('nexmo');
 
@@ -50,9 +52,14 @@ app.get('/', async (req, res) => {
 
 })
 
-app.use("/api", router);
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  });
 
-// router.route('/test').post(userController.test);
+app.use("/api", router);
 
 //User Profile Info Routes
 
@@ -101,6 +108,12 @@ router.route("/user/:pId/consultations").get(ehrsController.getConsultations);
 router.route("/emr/:cId").get(ehrsController.getEMR);
 
 // router.route("/medicinehistory/:pId").get(ehrsController.getPatientMedicineHistory);
+
+//Health Practitioners Routues
+
+router.route('/healthP/:mpid/patients').get(healthPractitionersController.getPatients);
+
+router.route('/getEmergencies').get(healthPractitionersController.getEmergencies);
 
 
 

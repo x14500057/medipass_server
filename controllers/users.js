@@ -166,7 +166,10 @@ exports.loginUser = async (req, res) => {
                 //Hash Password from login request with salt in Database.
                 const hashed_pass = checkHashPassword(user_password, salt).passwordHash;
                 if (pass == hashed_pass) {
+                
+                
                     res.status(200).send(result[0]);
+                    
                 }
                 else {
                     console.log(result);
@@ -572,12 +575,13 @@ exports.createEmergency = async (req, res) => {
 
     console.log("latitude: "+ lat);
     console.log("longitude:"+ long);
+    console.log(mediKey)
 
     //SQL Query for getting all emergency contacts associated with mediring
     const contactsSQL = `Select c.phNumber as phoneNo, c.contactName as name from Mediring as mr  
                  Inner JOIN Contacts as c
                  ON mr.PatientID = c.PatientID
-                 where mr.status = 1 AND medikey = ?`;
+                 where mr.status = 1 AND mr.medikey = ?`;
 
     //SQL Query for creating emergency record
     const addEmergSQL = `INSERT INTO emergency (emergency_id, medikey, date_occurred, latitude, longitude)
@@ -594,6 +598,8 @@ exports.createEmergency = async (req, res) => {
                     console.log('Internal error: ', error);
                     res.send("Mysql query execution error!", error);
                 } else {
+
+                    console.log(result)
                     getPlace(lat, long, (error, address) => {
                         if (error) { console.log(error) }
 
